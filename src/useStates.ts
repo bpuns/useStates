@@ -29,21 +29,21 @@ export function useStates<S extends Object>(defaultValue: S | (() => S)): UseSta
   return [
     useMemo(() => store.current.newData = data, [ data ]),
     useCallback((
-      function (fakeValueOrUpdateKey: any, fakeNewValue: any) {
+      function (valueOrUpdateKey: any, newValueOrGetNewValue: any) {
         const storeValue = store.current
         const { newData, dirtyData } = storeValue
         const oldValue = dirtyData || newData
         // 判断是否是单节点更新
-        if (typeof fakeValueOrUpdateKey === 'string') {
-          const newValue = isFunc(fakeNewValue) ? fakeNewValue(oldValue[fakeValueOrUpdateKey]) : fakeNewValue
-          if (oldValue[fakeValueOrUpdateKey] !== newValue) {
+        if (typeof valueOrUpdateKey === 'string') {
+          const newValue = isFunc(newValueOrGetNewValue) ? newValueOrGetNewValue(oldValue[valueOrUpdateKey]) : newValueOrGetNewValue
+          if (oldValue[valueOrUpdateKey] !== newValue) {
             // 先放到脏数据中
-            storeValue.dirtyData = assign(oldValue, { [fakeValueOrUpdateKey]: newValue })
+            storeValue.dirtyData = assign(oldValue, { [valueOrUpdateKey]: newValue })
           }
         }
         // 批量更新
         else {
-          const nextState: Partial<S> = isFunc(fakeValueOrUpdateKey) ? fakeValueOrUpdateKey(oldValue) : fakeValueOrUpdateKey
+          const nextState: Partial<S> = isFunc(valueOrUpdateKey) ? valueOrUpdateKey(oldValue) : valueOrUpdateKey
           // 判断是否需要更新
           if (Object.keys(nextState).some(k => nextState[k] !== oldValue[k])) {
             storeValue.dirtyData = assign(oldValue, nextState)
