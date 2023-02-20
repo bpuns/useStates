@@ -33,28 +33,26 @@ export function useStates<S extends Object>(defaultValue: S | (() => S)): UseSta
         const storeValue = store.current
         const { newData, dirtyData } = storeValue
         const oldValue = dirtyData || newData
+        // 验证是否需要更新
+        let needUpdate: boolean
         // 判断是否是单节点更新
         if (typeof valueOrUpdateKey === 'string') {
-          const newValue = isFunc(newValueOrGetNewValue) ? newValueOrGetNewValue(oldValue[newValueOrGetNewValue]) : newValueOrGetNewValue
-          if (oldValue[valueOrUpdateKey] !== newValue) {
+          const newValue = isFunc(newValueOrGetNewValue) ? newValueOrGetNewValue(oldValue[valueOrUpdateKey]) : newValueOrGetNewValue
+          if (needUpdate = oldValue[valueOrUpdateKey] !== newValue) {
             // 先放到脏数据中
             storeValue.dirtyData = assign(oldValue, { [valueOrUpdateKey]: newValue })
-          } else {
-            return
           }
         }
         // 批量更新
         else {
           const nextState: Partial<S> = isFunc(valueOrUpdateKey) ? valueOrUpdateKey(oldValue) : valueOrUpdateKey
           // 判断是否需要更新
-          if (Object.keys(nextState).some(k => nextState[k] !== oldValue[k])) {
+          if (needUpdate = Object.keys(nextState).some(k => nextState[k] !== oldValue[k])) {
             storeValue.dirtyData = assign(oldValue, nextState)
-          } else {
-            return
           }
         }
         // 如果脏数据中没值，那么放到微任务队列中，等待宏任务执行完毕出发更新
-        if (!dirtyData) {
+        if (needUpdate && !dirtyData) {
           queueMicrotask(() => {
             const dirtyData = storeValue.newData = { ...storeValue.dirtyData! }
             // 清空脏数据
