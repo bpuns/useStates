@@ -12,11 +12,19 @@ type AppUseStatesDispatch = UseStatesDispatch<AppUseStates>
 
 function App() {
 
-  const [state, setState, getNewState] = useStates<AppUseStates>({
+  // const [ name ] = useState()
+  // const [ age ] = useState()
+  // const [ key ] = useState()
+
+  const [ state, setState, getNewState ] = useStates({
     name: 'lin',
-    age: 1,
-    key: Math.random()
+    age:  1,
+    key:  Math.random()
   })
+
+  // state.age
+  // state.key
+  // state.name
 
   const updateState = (e: React.MouseEvent) => {
     e.stopPropagation()
